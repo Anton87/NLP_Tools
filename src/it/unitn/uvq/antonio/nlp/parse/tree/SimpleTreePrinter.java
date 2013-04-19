@@ -13,8 +13,10 @@ public class SimpleTreePrinter implements TreePrinter {
 	public String printTree(TreeBuilder tree) {
 		if (tree == null) throw new NullPointerException("tree: null");
 		return tree.isLeaf()
-				? tree.getText()
-				: "(" + tree.getText() + " " + printTrees(tree.getChildren()) + ")";			
+				//? tree.getText()
+				? tree.getText() + " {" + tree.getNodeNum() + "} "
+				// : "(" + tree.getText() + " " + printTrees(tree.getChildren()) + ")";
+				: "(" + tree.getText() + " {" + tree.getNodeNum() + "} " + printTrees(tree.getChildren()) + ")";
 	}
 	
 	private String printTrees(List<TreeBuilder> trees) { 

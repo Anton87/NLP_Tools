@@ -3,11 +3,24 @@ package it.unitn.uvq.antonio.nlp.parse.tree;
 import it.unitn.uvq.antonio.nlp.parse.tree.SimpleTreePrinter;
 import it.unitn.uvq.antonio.util.IntRange;
 
+import java.io.Externalizable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
-public class TreeBuilder implements Cloneable {
+public class TreeBuilder implements Cloneable, Externalizable {
+	
+	public TreeBuilder() { }
+	
+	public TreeBuilder(Tree tree) {
+		TreeBuilder tb = tree.builder();
+		init(tb.text, tb.nodeNum, tb.span, tb.parent, tb.children);
+	}
 	
 	TreeBuilder(String text, int nodeNum, IntRange span) {
 		this(text, nodeNum, span, null);
@@ -22,11 +35,27 @@ public class TreeBuilder implements Cloneable {
 		if (nodeNum < 0) throw new IllegalArgumentException("nodeNum < 0");
 		if (span == null) throw new IllegalArgumentException("span: null");
 		if (children == null) throw new NullPointerException("children: null");
+		init(text, nodeNum, span, parent, children);
+		/*
 		this.text = text;
 		this.nodeNum = nodeNum;
 		this.span = span;
 		this.parent = parent;
 		this.children = new ArrayList<>(children);
+		*/
+	}
+	
+	private void init(String text, int nodeNum, IntRange span, TreeBuilder parent, List<TreeBuilder> children) {
+		assert text != null;
+		assert span != null;
+		assert nodeNum >= 0;
+		assert parent != null;
+		assert children != null;
+		this.text = text;
+		this.nodeNum = nodeNum;
+		this.span = span;
+		this.parent = parent;
+		this.children = children;
 	}
 	
 	public TreeBuilder getRoot() {
@@ -76,6 +105,7 @@ public class TreeBuilder implements Cloneable {
 		unlink(tree, tree.parent); 
 		children.add(i, tree);
 		tree.setParent(this);
+		tree.getRoot().restoreNodeNums();  //
 		return this;
 	}
 	
@@ -165,10 +195,16 @@ public class TreeBuilder implements Cloneable {
 	
 	public List<TreeBuilder> getLeaves() { 
 		List<TreeBuilder> leaves = new ArrayList<>();
-		for (TreeBuilder tree : getNodes()) { 
-			if (tree.isLeaf()) { 
+		List<TreeBuilder> queue = new ArrayList<>();
+		queue.add(this);
+		
+		while (!queue.isEmpty()) {
+			TreeBuilder tree = queue.remove(0); 
+			if (tree.isLeaf()) {
 				leaves.add(tree);
 			}
+			queue.addAll(0, tree.getChildren());
+			
 		}
 		return leaves;
 	}
@@ -201,6 +237,13 @@ public class TreeBuilder implements Cloneable {
 	
 	public Tree build() { return new Tree(this); }
 	
+	private void restoreNodeNums() { 
+		int i = 1;
+		for (TreeBuilder tree : getNodes()) { 
+			tree.setNodeNum(i++);			
+		}
+	}
+	
 	/*
 	public Tree build() {		
 		Tree tree = null;
@@ -219,6 +262,8 @@ public class TreeBuilder implements Cloneable {
 		return SimpleTreePrinter.print(this);				
 	}
 	
+	int parentNodeNum = 0;
+	
 	private String text = null;
 	
 	private int nodeNum = 0;
@@ -228,5 +273,71 @@ public class TreeBuilder implements Cloneable {
 	private TreeBuilder parent = null;
 	
 	private List<TreeBuilder> children = null;
+	
+	/** 
+	 * Saves the tree on a file.
+	 * 
+	 * @param outFile The path where to save the tree
+	 * @return The saved tree
+	 * @throws NullPointerException if (outFile == null)
+	 */
+	public static TreeBuilder saveTree(TreeBuilder tree, String outFile) { 
+		if (tree == null) throw new NullPointerException("outFile: null");
+		if (outFile == null) throw new NullPointerException("outFile: null");
+		try {
+			TreeMarshaller.marshal(tree, outFile);
+		} catch (TreeMarshalException e) {
+			logger.warning("Tree marshalling error.");
+		}
+		return tree;
+	}
+	
+	public TreeBuilder save(String outFile) { 
+		if (outFile == null) throw new NullPointerException("pathname: null");
+		return saveTree(this, outFile);
+	}
+	
+	public TreeBuilder load(String inFile) { 
+		if (inFile == null) throw new NullPointerException("inFile: null");
+		TreeBuilder tree = loadTree(inFile);
+		if (tree != null) {
+			init(tree.text, tree.nodeNum, tree.span, tree.parent, tree.children);
+		}
+		return this;
+	}
+	
+	public static TreeBuilder loadTree(String inFile) { 
+		if (inFile == null) throw new NullPointerException("inFile: null");
+		TreeBuilder tree = null;
+		try {
+			tree = TreeUnmarshaller.unmarshal(inFile);
+		} catch (FileNotFoundException e) { 
+			logger.warning("File not found: \"" + inFile + "\".");
+		} catch (TreeUnmarshalException e) {
+			logger.warning("Tree unmarshalling error.");
+		}
+		return tree;
+	}
+
+	
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(text);
+		out.writeInt(nodeNum);
+		out.writeObject(span);
+		out.writeInt(parent == null ? 0 : parent.getNodeNum());		
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		text = (String) in.readObject();
+		nodeNum = in.readInt();
+		span = (IntRange) in.readObject();
+		parentNodeNum = in.readInt();
+		children = new ArrayList<>();
+	}
+	
+	private static Logger logger = Logger.getLogger(TreeBuilder.class.getName());
 
 }

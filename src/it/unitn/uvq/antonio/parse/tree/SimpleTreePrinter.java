@@ -14,8 +14,9 @@ public class SimpleTreePrinter implements TreePrinter {
 		if (tree == null) throw new NullPointerException("tree: null");
 		return tree.isLeaf()
 				? tree.getText()
-				: "(" + tree.getText() + " " + printTrees(tree.getChildren()) + ")";			
-	}
+				//: "(" + tree.getText() + " " + printTrees(tree.getChildren()) + ")";
+			    : "(" + tree.getText() + " {" + tree.getNodeNum() + "} " + printTrees(tree.getChildren()) + ")";
+		}
 	
 	private String printTrees(List<TreeBuilder> trees) { 
 		assert trees != null;

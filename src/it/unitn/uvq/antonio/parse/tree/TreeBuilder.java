@@ -219,6 +219,14 @@ public class TreeBuilder implements Cloneable {
 		return SimpleTreePrinter.print(this);				
 	}
 	
+	private TreeBuilder restoreNodeNumbers() { 
+		int i = 1;
+		for (TreeBuilder tree : getNodes()) { 
+			tree.setNodeNum(i);
+		}
+		return this;
+	}
+	
 	private String text = null;
 	
 	private int nodeNum = 0;

@@ -3,7 +3,8 @@ package it.unitn.uvq.antonio.nlp.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unitn.uvq.antonio.parse.tree.TreeBuilder;
+import it.unitn.uvq.antonio.nlp.parse.tree.TreeBuilderFactory;
+import it.unitn.uvq.antonio.nlp.parse.tree.TreeBuilder;
 import it.unitn.uvq.antonio.util.IntRange;
 import it.unitn.uvq.antonio.util.tuple.Pair;
 import it.unitn.uvq.antonio.util.tuple.SimplePair;
@@ -15,14 +16,15 @@ public class BasicAnnotationApi implements AnnotationApi {
 		TreeBuilder subTree = findBestMatchingSubTree(a, tree);
 		if (subTree == null) { return false; }
 		return subTreeMatch(a, subTree) ||
-			   subTreeChidldrenMatchAnnotation(a, subTree);
+			   subTreeChildrenMatchAnnotation(a, subTree);
 	}
 
 	@Override
 	public TreeBuilder annotate(TextAnnotationI a, TreeBuilder tree) {
-		if (isAnnotable(a, tree)) { return false; }
-		TreeBuilder subTree = findBestMatchingSubTree(a, tree);
-		annotateSubTree(a, subTree);
+		if (isAnnotable(a, tree)) { 
+			TreeBuilder subTree = findBestMatchingSubTree(a, tree);
+			annotateSubTree(a, subTree);
+		}
 		return tree;
 	}
 	
@@ -45,7 +47,7 @@ public class BasicAnnotationApi implements AnnotationApi {
 		assert subTree != null;
 		
 		TreeBuilder root = subTree.getRoot();
-		if (subTreeMatch(subTree.getSpan(), a.span())) {
+		if (subTreeMatch(a, subTree)) {
 			root = tagSubTree(a, subTree);
 		} else if (subTreeChildrenMatchAnnotation(a, subTree)) {
 			root = tagSubTreePortion(a, subTree).getRoot();
@@ -59,11 +61,12 @@ public class BasicAnnotationApi implements AnnotationApi {
 		assert a != null;
 		assert subTree != null;
 		TreeBuilder parent = subTree.getParent();
-		int pos = parent.getChildren().indexOf(subTree);
-		parent.removeChild(subTree);
-		TreeBuilder aTree = tagTree(a, subTree);
-		parent.addChild(pos, aTree);
-		return aTree;
+		//int pos = parent.getChildren().indexOf(subTree);
+		//parent.removeChild(subTree);
+		//TreeBuilder aTree = tagTree(a, subTree);
+		subTree.setText(a.text());
+		//parent.addChild(pos, aTree);
+		return subTree;
 	}
 	
 	private TreeBuilder tagSubTreePortion(TextAnnotationI a, TreeBuilder subTree) { 
@@ -80,20 +83,21 @@ public class BasicAnnotationApi implements AnnotationApi {
 	private TreeBuilder buildNewTree(TextAnnotationI a, List<TreeBuilder> children) { 
 		assert a != null;
 		assert children != null;
-		IntRange cSpan = getSpan(children);
-		
-		TreeBuilder newSubTree = new TreeBuilder(text, 0, cSpan.start(), cSpan.end());
+		IntRange span = getSpan(children);
+		TreeBuilder newSubTree = TreeBuilderFactory.newInstance(a.text(), 0, span);
 		newSubTree.addChildren(children);
 		
 		return newSubTree;
 	}
 	
+	/*
 	private TreeBuilder tagSubTree(TextAnnotationI a, TreeBuilder subTree) {
 		assert a != null;
 		assert subTree != null;
 		subTree.setText(a.text());
 		return subTree;
 	}
+	*/
 	
 	private boolean subTreeMatch(TextAnnotationI a, TreeBuilder subTree) {
 		assert a != null;
@@ -103,7 +107,7 @@ public class BasicAnnotationApi implements AnnotationApi {
 	
 	private boolean subTreeChildrenMatchAnnotation(TextAnnotationI a, TreeBuilder subTree) {
 		assert a != null;
-		assert tree != null;
+		assert subTree != null;
 		List<TreeBuilder> subTreeChildren = getOverlappingChildren(a, subTree);
 		IntRange span = getSpan(subTreeChildren);
 		return span.equals(a.span());

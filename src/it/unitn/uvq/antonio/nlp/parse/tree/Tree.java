@@ -63,6 +63,16 @@ public final class Tree {
 		return SimpleTreePrinter.print(tb);
 	}
 	
+	TreeBuilder builder() {
+		TreeBuilder copy = null;
+		try {
+			copy = (TreeBuilder) tb.clone();
+		} catch (CloneNotSupportedException e) {
+			/* Clone operation is supported. */
+		}
+		return copy;
+	}
+	
 	private TreeBuilder tb;
 	
 }

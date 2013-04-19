@@ -1,6 +1,6 @@
 package it.unitn.uvq.antonio.nlp.annotation;
 
-import it.unitn.uvq.antonio.parse.tree.TreeBuilder;
+import it.unitn.uvq.antonio.nlp.parse.tree.TreeBuilder;
 
 public interface AnnotationApi {
 	

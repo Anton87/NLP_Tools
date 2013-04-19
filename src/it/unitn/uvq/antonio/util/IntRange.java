@@ -1,6 +1,13 @@
 package it.unitn.uvq.antonio.util;
 
-public class IntRange implements Comparable<IntRange> {
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+public class IntRange implements Comparable<IntRange>, Externalizable {
+	
+	public IntRange() { }
 	
 	public IntRange(int start, int end) {
 		if (start > end) throw new IllegalArgumentException("start > end");
@@ -36,9 +43,9 @@ public class IntRange implements Comparable<IntRange> {
 		return start <= o.start && end <= o.end;
 	}
 	
-	private final int start;
+	private int start;
 	
-	private final int end;
+	private int end;
 
 	@Override
 	public int compareTo(IntRange o) {
@@ -80,6 +87,21 @@ public class IntRange implements Comparable<IntRange> {
 	@Override
 	public String toString() {
 		return "{" + start + ", " + end + "}";
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeInt(start);
+		out.writeInt(end);		
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		start = in.readInt();
+		end = in.readInt();
+		
+		
 	}
 	
 	/*

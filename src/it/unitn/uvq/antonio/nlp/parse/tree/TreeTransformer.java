@@ -6,8 +6,20 @@ import java.util.List;
 import it.unitn.uvq.antonio.util.IntRange;
 import edu.stanford.nlp.ling.CoreLabel;
 
+/**
+ * Transforms a Stanford Tree (@see edu.stanford.nlp.trees.Tree) in a Tree object.
+ * 
+ * @author Antonio Uva 145683
+ *
+ */
 public class TreeTransformer {
 	
+	/**
+	 * Builds a new tree from a Stanford tree object. 
+	 * 
+	 * @param tree A stanford tree
+	 * @return The transformed tree
+	 */
 	public static TreeBuilder transform(edu.stanford.nlp.trees.Tree tree) {
 		if (tree == null) throw new NullPointerException("tree: null");
 		IntRange span = getSpan(tree);
@@ -35,12 +47,9 @@ public class TreeTransformer {
 	static IntRange getSpan(edu.stanford.nlp.trees.Tree tree) {
 		assert tree != null;
 		List<edu.stanford.nlp.trees.Tree> leaves = tree.getLeaves();
-		CoreLabel label = (CoreLabel) tree.label();
 		int start = ((CoreLabel) leaves.get(0).label()).beginPosition();
 		int end = ((CoreLabel) leaves.get(leaves.size() -1).label()).endPosition();
-		
 		return new IntRange(start, end);
-	}
-	
+	}	
 	
 }
