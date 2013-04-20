@@ -10,6 +10,12 @@ public class SimpleTreePrinter implements TreePrinter {
 	}
 	
 	@Override
+	public String printTree(Tree tree) { 
+		if (tree == null) throw new NullPointerException("tree: null");
+		return printTree(tree.builder());
+	}
+	
+	@Override
 	public String printTree(TreeBuilder tree) {
 		if (tree == null) throw new NullPointerException("tree: null");
 		return tree.isLeaf()

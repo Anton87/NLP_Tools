@@ -112,6 +112,6 @@ public final class Tree {
 		return this;
 	}
 	
-	private TreeBuilder tb;
+	TreeBuilder tb;
 	
 }
