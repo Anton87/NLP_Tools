@@ -73,7 +73,9 @@ public class Parser {
 		tb.save("/home/antonio/Scrivania/test/tree");
 		//tb.load("/home/antonio/Scrivania/test/tree");
 		
-		TreeBuilder newTree = TreeBuilder.loadTree("/home/antonio/Scrivania/test/tree");
+		//TreeBuilder newTree = TreeBuilder.loadTree("/home/antonio/Scrivania/test/tree");
+		TreeBuilder newTree = new TreeBuilder();
+		newTree.load("/home/antonio/Scrivania/test/tree");
 		
 		System.out.println(newTree);
 		

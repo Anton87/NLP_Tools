@@ -25,9 +25,7 @@ public class TreeUnmarshaller {
 	public static TreeBuilder unmarshal(String inFile) throws FileNotFoundException, TreeUnmarshalException {
 		if (inFile == null) throw new NullPointerException("inFile: null");
 		if (!isDirectory(inFile)) throw new FileNotFoundException("File not found: \"" + inFile + "\".");
-		System.out.print("Reading trees... ");
 		List<TreeBuilder> nodes = readTrees(inFile);
-		System.out.println("Done.");
 		Collections.sort(nodes, treeNodeNumCmp);
 		TreeBuilder tree = restoreTreeStruct(nodes);
 		return tree;
@@ -53,12 +51,10 @@ public class TreeUnmarshaller {
 			String fp = file.getPath();
 			ObjectInput in = null;
 			try {
-				System.out.print("Reading tree from file: \"" + fp + "\"... ");
 				in = 
 						new ObjectInputStream(
 								new FileInputStream(fp));
 				TreeBuilder tree = (TreeBuilder) in.readObject();
-				System.out.println("Done.");
 				trees.add(tree);
 			} catch (FileNotFoundException e) {
 				throw new TreeUnmarshalException("File not found: \"" + fp + "\"", e);

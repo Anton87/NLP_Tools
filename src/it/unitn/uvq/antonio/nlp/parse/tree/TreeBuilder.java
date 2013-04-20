@@ -36,13 +36,6 @@ public class TreeBuilder implements Cloneable, Externalizable {
 		if (span == null) throw new IllegalArgumentException("span: null");
 		if (children == null) throw new NullPointerException("children: null");
 		init(text, nodeNum, span, parent, children);
-		/*
-		this.text = text;
-		this.nodeNum = nodeNum;
-		this.span = span;
-		this.parent = parent;
-		this.children = new ArrayList<>(children);
-		*/
 	}
 	
 	private void init(String text, int nodeNum, IntRange span, TreeBuilder parent, List<TreeBuilder> children) {
@@ -105,7 +98,7 @@ public class TreeBuilder implements Cloneable, Externalizable {
 		unlink(tree, tree.parent); 
 		children.add(i, tree);
 		tree.setParent(this);
-		tree.getRoot().restoreNodeNums();  //
+		tree.getRoot().restore();  //
 		return this;
 	}
 	
@@ -142,6 +135,7 @@ public class TreeBuilder implements Cloneable, Externalizable {
 		if (hasChild(child)) {
 			children.remove(child); 
 			unlink(child, child.getParent());
+			restore(); // 
 		}
 		return this;
 	}	
@@ -157,8 +151,12 @@ public class TreeBuilder implements Cloneable, Externalizable {
 	}
 	
 	public TreeBuilder removeChild(int i) {
+		TreeBuilder child = children.get(i);
+		removeChild(child);		
+		/*
 		TreeBuilder tree = children.remove(i);
 		unlink(tree, tree.parent);
+		*/
 		return this;
 	}
 
@@ -237,6 +235,11 @@ public class TreeBuilder implements Cloneable, Externalizable {
 	
 	public Tree build() { return new Tree(this); }
 	
+	private void restore() {
+		restoreNodeNums();
+		restoreSpans();
+	}
+	
 	private void restoreNodeNums() { 
 		int i = 1;
 		for (TreeBuilder tree : getNodes()) { 
@@ -244,18 +247,17 @@ public class TreeBuilder implements Cloneable, Externalizable {
 		}
 	}
 	
-	/*
-	public Tree build() {		
-		Tree tree = null;
-		try {
-			TreeBuilder copy = (TreeBuilder) clone();
-			tree = new Tree(copy);
-		} catch (CloneNotSupportedException e) { 
-			// Clone operation is supported. 
+	private void restoreSpans()  {
+		for (TreeBuilder tree : getNodes()) {
+			if (!tree.isLeaf()) { 
+				List<TreeBuilder> leaves = tree.getLeaves();
+				int start = leaves.get(0).start();
+				int end = leaves.get(leaves.size() - 1).end();
+				tree.setSpan(new IntRange(start, end));
+			}
 		}
-		return tree;		
 	}
-	*/	
+	
 	
 	@Override
 	public String toString() {
@@ -279,7 +281,7 @@ public class TreeBuilder implements Cloneable, Externalizable {
 	 * 
 	 * @param outFile The path where to save the tree
 	 * @return The saved tree
-	 * @throws NullPointerException if (outFile == null)
+	 * @throws NullPointerException if (outFile == null || outFile == null)
 	 */
 	public static TreeBuilder saveTree(TreeBuilder tree, String outFile) { 
 		if (tree == null) throw new NullPointerException("outFile: null");

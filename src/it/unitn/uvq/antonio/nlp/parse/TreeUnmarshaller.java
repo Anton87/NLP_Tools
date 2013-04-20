@@ -99,7 +99,6 @@ public class TreeUnmarshaller {
 		catch (TreeUnmarshalException e) {
 			System.err.println("Tree unmarshalling error.");
 		}
-		System.out.println(tree);
 		
 	}
 

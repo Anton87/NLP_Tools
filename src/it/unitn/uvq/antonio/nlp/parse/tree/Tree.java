@@ -73,6 +73,45 @@ public final class Tree {
 		return copy;
 	}
 	
+	/**
+	 * Save a tree on a file.
+	 * 
+	 * @param tree The tree to save
+	 * @param outFile A string holding the path where to save the tree
+	 * @return NullPointerException if (tree == null || outFile == null)
+	 */
+	public static Tree saveTree(Tree tree, String outFile) { 
+		if (tree == null) throw new NullPointerException("tree: null");
+		if (outFile == null) throw new NullPointerException("outFile: null");
+		TreeBuilder.saveTree(tree.tb, outFile);
+		return tree;
+	}
+	
+	public Tree save(String outFile) {
+		if (outFile == null) throw new NullPointerException("outFile: null");
+		return saveTree(this, outFile);
+	}
+	
+	/**
+	 * Load a tree from a file.
+	 * 
+	 * @param inFile A string holding the path of tree to load
+	 * @return The loaded tree
+	 * @throws NullPointerException if (inFile == null)
+	 */
+	public static Tree loadTree(String inFile) {
+		if (inFile == null) throw new NullPointerException("inFile: null");
+		Tree tree = null;
+		TreeBuilder tb = TreeBuilder.loadTree(inFile);
+		return tree == null ? null : new Tree(tb);
+	}
+	
+	public Tree load(String inFile) {
+		if (inFile == null) throw new NullPointerException("inFile: null");
+		tb = TreeBuilder.loadTree(inFile);
+		return this;
+	}
+	
 	private TreeBuilder tb;
 	
 }
