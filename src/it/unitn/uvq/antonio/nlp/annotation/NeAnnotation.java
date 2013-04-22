@@ -1,48 +1,78 @@
 package it.unitn.uvq.antonio.nlp.annotation;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+import it.unitn.uvq.antonio.nlp.ner.NamedEntityType;
 import it.unitn.uvq.antonio.util.IntRange;
 
-public class NeAnnotation implements NeAnnotationI {
+public class NeAnnotation implements NeAnnotationI, Externalizable {
 	
-	public NeAnnotation(String text, String name, String type, IntRange span) {
-		if (name == null) throw new NullPointerException("name: null");
+	public NeAnnotation() { }
+	
+	public NeAnnotation(String text, NamedEntityType type, IntRange span) {
+		if (text == null) throw new NullPointerException("text: null");
 		if (type == null) throw new NullPointerException("type: null");
-		this.name = name;
-		this.type = type;
-		a = new TextAnnotation(text, span);		
+		if (span == null) throw new NullPointerException("span: null");
+		init(text, type, span);
 	}
 	
-	public NeAnnotation(String text, String name, String type, int start, int end) {
-		this(text, name, type, new IntRange(start, end));
+	public NeAnnotation(String text, NamedEntityType type, int start, int end) {
+		this(text, type, new IntRange(start, end));
+	}
+	
+	private void init(String text, NamedEntityType type, IntRange span) { 
+		assert text != null;
+		assert type != null;
+		assert span != null;
+		
+		this.text = text;
+		this.type = type;
+		this.span = span;
 	}
 
 	@Override
-	public String text() { return a.text(); }
+	public String text() { return text; }
 
 	@Override
-	public IntRange span() { return a.span(); }
+	public IntRange span() { return span; }
 
 	@Override
-	public int start() { return a.start(); }
+	public int start() { return span.start(); }
 
 	@Override
-	public int end() { return a.end(); }
+	public int end() { return span.end(); }
 
 	@Override
-	public String name() { return name; }
-
-	@Override
-	public String type() { return type; }
+	public NamedEntityType type() { return type; }
+	
 	
 	@Override
 	public String toString() {
-		return "NeAnnotation(text=\"" + a.text() + "\", name=\"" + name() + "\", type=\"" + type() + "\", start=" + a.start() + ", end=" + a.end() + ")";
+		return "NeAnnotation(text=\"" + text + "\", type=" + type + ", start=" + span.start() + ", end=" + span.end() + ")";
 	}
 	
-	private final String name;
+	@Override
+	public void writeExternal(ObjectOutput out) throws IOException {
+		out.writeObject(text);
+		out.writeObject(type);
+		out.writeObject(span);		
+	}
+
+	@Override
+	public void readExternal(ObjectInput in) throws IOException,
+			ClassNotFoundException {
+		text = (String) in.readObject();
+		type = (NamedEntityType) in.readObject();
+		span = new IntRange(in.readInt(), in.readInt());
+	}
 	
-	private final String type;
+	private String text;
 	
-	private final TextAnnotation a;
+	private IntRange span;
+	
+	private NamedEntityType type;
 
 }
