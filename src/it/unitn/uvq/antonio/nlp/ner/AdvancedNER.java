@@ -24,8 +24,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 /**
  * Labels the sequence of words in a text which are the name of things such 
  *  as person, organization and location.
- * Additionally, it divides the list of Named Entity found within the sentence in
- *   Primary Entities (with text NE) and Additional Entities (with text AE).
+ * Additionally, it split the list of Named Entity found in
+ *   Primary Entities (NE)  and Additional Entities (AE).
  *
  *  @author Antonio Uva 145683
  *
@@ -33,12 +33,11 @@ import edu.stanford.nlp.ling.CoreLabel;
 public class AdvancedNER {
 	
 	/**
-	 * Returns a list of NeAnnotations about the NEs found in the text.
-	 *  The returned entities are divided in Primary and Additional entities. 
+	 * Returns a list of Named Entity annotations found in this sentence. 
 	 * 
-	 * @param namesList The list of the name of the Primary Entity
-	 * @param namesType The type of the Primary entity
-	 * @param str The string to search for Named Entities
+	 * @param namesList The list of names of the main entity
+	 * @param namesType The type of the main entity (i.e. {@link NamedEntityType})
+	 * @param str The sentence to search for Named Entity annotations
 	 * @return The list of Named Entity annotations found in the text
 	 * @throws NullPointerException if (names == null) || (namesType == null) || (str == null)
 	 */
