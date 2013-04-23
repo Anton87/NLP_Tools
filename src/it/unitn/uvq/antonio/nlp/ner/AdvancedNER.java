@@ -1,20 +1,11 @@
 package it.unitn.uvq.antonio.nlp.ner;
 
-import it.unitn.uvq.antonio.nlp.annotation.AnnotationApi;
-import it.unitn.uvq.antonio.nlp.annotation.BasicAnnoationApiTest;
-import it.unitn.uvq.antonio.nlp.annotation.BasicAnnotationApi;
 import it.unitn.uvq.antonio.nlp.annotation.NeAnnotation;
 import it.unitn.uvq.antonio.nlp.annotation.NeAnnotationI;
-import it.unitn.uvq.antonio.nlp.annotation.TextAnnotationI;
-import it.unitn.uvq.antonio.nlp.parse.AnnotationAPI;
-import it.unitn.uvq.antonio.nlp.parse.Parser;
-import it.unitn.uvq.antonio.nlp.parse.tree.Tree;
-import it.unitn.uvq.antonio.nlp.parse.tree.TreeBuilder;
 import it.unitn.uvq.antonio.util.IntRange;
 import edu.stanford.nlp.util.Triple;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
@@ -55,17 +46,26 @@ public class AdvancedNER {
 		
 		List<NeAnnotationI> annotations = new ArrayList<>();
 		Names names = newNames(namesList, namesType);
-		for (Triple<String, Integer, Integer> triple : classifier.classifyToCharacterOffsets(str)) {			
-			String eTypeName = triple.first;
-			IntRange eSpan = new IntRange(triple.second, triple.third);
-			String eNameText = str.substring(eSpan.start(), eSpan.end());			
-			NamedEntityType eType = NamedEntityType.valueOf(eTypeName);
-			Name eName = newName(eNameText, eType);			
-			String aText = names.isAlias(eName) ? "NE" : "AE";			
-			NeAnnotationI a = new NeAnnotation(aText, eType, eSpan);
+		for (Triple<String, Integer, Integer> entityInfo : classifier.classifyToCharacterOffsets(str)) {			
+			NeAnnotationI a  = getNeAnnotation(names,  entityInfo, str); 
 			annotations.add(a);
 		}
 		return annotations;
+	}
+	
+	private static NeAnnotationI getNeAnnotation(Names names, Triple<String, Integer, Integer> entityInfo, String str) {
+		assert names != null;
+		assert entityInfo != null;
+		assert str != null;
+		
+		String entTypeName = (String) entityInfo.first;
+		NamedEntityType entType = NamedEntityType.valueOf(entTypeName);
+		IntRange entSpan = new IntRange((Integer) entityInfo.second, (Integer) entityInfo.third);
+		String entText = str.substring(entSpan.start(), entSpan.end());
+		Name entName = newName(entText, entType);
+		String entPri = names.isAlias(entName) ? "NE" : "AE";
+		NeAnnotationI a = new NeAnnotation(entPri, entType, entSpan);
+		return a;		
 	}
 	
 	private static Names newNames(List<String> namesList, NamedEntityType type) {
@@ -100,7 +100,6 @@ public class AdvancedNER {
 				retName = null;
 				break;
 		}
-		// System.out.println(name + " has class " + retName.getClass().getSimpleName());
 		return retName;
 	}	
 	
@@ -110,24 +109,6 @@ public class AdvancedNER {
 	@SuppressWarnings("unchecked")
 	private static AbstractSequenceClassifier<CoreLabel> classifier =
 			CRFClassifier.getClassifierNoExceptions(SEQUENCE_MODEL);
-	
-	public static void main(String[] args) {
-		String str = "He is nicknamed Il Cavaliere (The Knight) for his Order of Merit for Labour.[2] Berlusconi is the longest-serving post-war Prime Minister of Italy, and third longest-serving since the Unification of Italy, after Benito Mussolini and Giovanni Giolitti, holding three separate terms.";
-		Tree tree = Parser.parse(str);
-		TreeBuilder tb = new TreeBuilder(tree);
-		AnnotationApi api = new BasicAnnotationApi();
-		String[] names = { "Silvio Berlusconi", "The Knight", "Berlusca", "Nano", "Unto dal Signore", "Il Cavaliere", "Sua Emittenza", "Psiconano", "Il Caimano", "Papi" };
-		List<String> namesList = Arrays.asList(names);
-		
-		List<NeAnnotationI> aList = classify(namesList, NamedEntityType.PERSON, str);
-		System.out.print(tree);
-		for (NeAnnotationI a : aList) { 
-			String text = str.substring(a.start(), a.end()); 
-			api.annotate(a, tb);
-			System.out.println("Entity(\"" + text + "\", " + a.text() + ", " + a.type() + ", " + a.start() + ", " + a.end() + ")");
-		}
-		System.out.println(tb);
-	}
 
 }
 

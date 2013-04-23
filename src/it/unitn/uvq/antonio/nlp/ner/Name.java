@@ -33,7 +33,7 @@ public abstract class Name {
 		return isAliasOf(name);
 	}
 	
-	public boolean isAliasOf(Name name) { 
+	protected boolean isAliasOf(Name name) { 
 		if (name == null) throw new NullPointerException("name: null");
 		String name1 = type().abbr() + "#" + text;
 		String name2 = name.type().abbr() + "#" + name.text;

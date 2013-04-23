@@ -7,14 +7,14 @@ import java.io.ObjectOutput;
 
 import it.unitn.uvq.antonio.util.IntRange;
 
-public class AbstractAnnotation implements AnnotationI, Externalizable {
+public class Annotation implements AnnotationI, Externalizable {
 	
-	AbstractAnnotation(IntRange span) {
+	public Annotation(IntRange span) {
 		if (span == null) throw new NullPointerException("span: null");
 		this.span = span;
 	}
 	
-	AbstractAnnotation(int start, int end) {
+	public Annotation(int start, int end) {
 		this(new IntRange(start, end));
 	}
 
