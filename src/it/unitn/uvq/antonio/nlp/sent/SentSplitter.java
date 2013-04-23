@@ -29,6 +29,7 @@ public class SentSplitter {
 	 *  
 	 * @param str A string holding the text to annotate
 	 * @return The list of sentence annotations
+	 * @throws NullPointerException if (str == null)
 	 */
 	public static List<AnnotationI> annotateSents(String str) { 
 		if (str == null) throw new NullPointerException("str: null");
@@ -48,6 +49,7 @@ public class SentSplitter {
 	 * @param str A string holding the text to break 
 	 *  into sentences
 	 * @return The list of split sentences
+	 * @throws NullPointerException if (str == null)
 	 */
 	public static List<String> split(String str) {
 		if (str == null) throw new NullPointerException("str: null");
