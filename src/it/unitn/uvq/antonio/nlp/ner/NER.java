@@ -1,8 +1,10 @@
 package it.unitn.uvq.antonio.nlp.ner;
 
+import it.unitn.uvq.antonio.nlp.annotation.NeAnnotation;
+import it.unitn.uvq.antonio.nlp.annotation.NeAnnotationI;
+import it.unitn.uvq.antonio.util.IntRange;
 import it.unitn.uvq.antonio.util.tuple.Quadruple;
 import it.unitn.uvq.antonio.util.tuple.SimpleQuadruple;
-import edu.stanford.nlp.util.Triple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,19 @@ import edu.stanford.nlp.ling.CoreLabel;
  */
 public class NER {
 	
+	public static List<NeAnnotationI> annotateNes(final String str) {
+		List<NeAnnotationI> annotations = new ArrayList<>();
+		List<Quadruple<String, String, Integer, Integer>> nes =
+				classify(str);
+		for (Quadruple<String, String, Integer, Integer> ne : nes) {
+			IntRange span = new IntRange(ne.third(), ne.fourth());
+			NamedEntityType type = NamedEntityType.valueOf(ne.second());
+			NeAnnotationI a = new NeAnnotation("NE", type, span);
+			annotations.add(a);
+		}
+		return annotations;		
+	}
+	
 	/**
 	 * Returns a list of triples holding the info about NEs found.
 	 * 
@@ -35,8 +50,8 @@ public class NER {
 	private static List<Quadruple<String, String, Integer, Integer>> classifyToCharacterOffsets(final String str) { 
 		assert str != null;
 		List<Quadruple<String, String, Integer, Integer>> qples = new ArrayList<>();
-		for (Triple<String, Integer, Integer> triple : classifier.classifyToCharacterOffsets(str)) { 
-			String name = str.substring(triple.second(), triple.third());
+		for (edu.stanford.nlp.util.Triple<String, Integer, Integer> triple : classifier.classifyToCharacterOffsets(str)) {
+			String name = str.substring(triple.second, triple.third);
 			Quadruple<String, String, Integer, Integer> qple = new SimpleQuadruple<>(name, triple.first, triple.second, triple.third);
 			qples.add(qple);			
 		}
